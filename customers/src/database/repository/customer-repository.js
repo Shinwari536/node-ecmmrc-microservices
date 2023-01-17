@@ -4,7 +4,7 @@ const { APIError, BadRequestError, STATUS_CODES } = require('../../utils/app-err
 //Dealing with data base operations
 class CustomerRepository {
 
-    async CreateCustomer({ email, password, phone, salt }) {
+    async createCustomer({ email, password, phone, salt }) {
         try {
             const customer = new CustomerModel({
                 email,
@@ -42,12 +42,12 @@ class CustomerRepository {
             return await profile.save();
 
         } catch (err) {
-            console.log("Error: ",err);
+            console.log("Error: ", err);
             throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Error on Create Address')
         }
     }
 
-    async FindCustomer({ email }) {
+    async findCustomer({ email }) {
         try {
             const existingCustomer = await CustomerModel.findOne({ email: email });
             return existingCustomer;
@@ -56,7 +56,7 @@ class CustomerRepository {
         }
     }
 
-    async FindCustomerById({ id }) {
+    async findCustomerById({ id }) {
 
         try {
             const existingCustomer = await CustomerModel.findById(id).populate('address');
@@ -66,7 +66,7 @@ class CustomerRepository {
         }
     }
 
-    async Wishlist(customerId) {
+    async wishlist(customerId) {
         try {
             const profile = await CustomerModel.findById(customerId).populate('wishlist');
 
@@ -76,11 +76,8 @@ class CustomerRepository {
         }
     }
 
-    async AddWishlistItem(customerId, { _id, name, dec, banner, available, price }) {
+    async addWishlistItem(customerId, product) {
 
-        const product = {
-            _id: _id, name, dec, price, available, banner
-        };
         try {
             const profile = await CustomerModel.findById(customerId).populate('wishlist');
 
@@ -119,11 +116,9 @@ class CustomerRepository {
 
     }
 
-
-    async AddCartItem(customerId, { _id, name, banner, price }, qty, isRemove) {
+    async addCartItem(customerId, product, qty, isRemove) {
 
         try {
-            const product = { _id, name, banner, price };
             const profile = await CustomerModel.findById(customerId).populate('cart');
 
             if (profile) {
@@ -170,7 +165,7 @@ class CustomerRepository {
 
     }
 
-    async AddOrderToProfile(customerId, order) {
+    async addOrderToProfile(customerId, order) {
 
         try {
 

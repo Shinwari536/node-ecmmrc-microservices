@@ -16,7 +16,7 @@ class CustomerService {
 
         try {
 
-            const existingCustomer = await this.repository.FindCustomer({ email });
+            const existingCustomer = await this.repository.findCustomer({ email });
 
             if (existingCustomer) {
 
@@ -47,7 +47,7 @@ class CustomerService {
 
             let userPassword = await GeneratePassword(password, salt);
 
-            const existingCustomer = await this.repository.CreateCustomer({ email, password: userPassword, phone, salt });
+            const existingCustomer = await this.repository.createCustomer({ email, password: userPassword, phone, salt });
 
             const token = await GenerateSignature({ email: email, _id: existingCustomer._id });
 
@@ -77,7 +77,7 @@ class CustomerService {
     async GetProfile(id) {
 
         try {
-            const existingCustomer = await this.repository.FindCustomerById({ id });
+            const existingCustomer = await this.repository.findCustomerById({ id });
             return FormateData(existingCustomer);
 
         } catch (err) {
@@ -88,7 +88,7 @@ class CustomerService {
     async GetShopingDetails(id) {
 
         try {
-            const existingCustomer = await this.repository.FindCustomerById({ id });
+            const existingCustomer = await this.repository.findCustomerById({ id });
 
             if (existingCustomer) {
                 return FormateData(existingCustomer);
@@ -103,7 +103,7 @@ class CustomerService {
     async GetWishList(customerId) {
 
         try {
-            const wishListItems = await this.repository.Wishlist(customerId);
+            const wishListItems = await this.repository.wishlist(customerId);
             return FormateData(wishListItems);
         } catch (err) {
             throw new APIError('Data Not found', err)
@@ -112,7 +112,7 @@ class CustomerService {
 
     async AddToWishlist(customerId, product) {
         try {
-            const wishlistResult = await this.repository.AddWishlistItem(customerId, product);
+            const wishlistResult = await this.repository.addWishlistItem(customerId, product);
             return FormateData(wishlistResult);
 
         } catch (err) {
@@ -122,7 +122,7 @@ class CustomerService {
 
     async ManageCart(customerId, product, qty, isRemove) {
         try {
-            const cartResult = await this.repository.AddCartItem(customerId, product, qty, isRemove);
+            const cartResult = await this.repository.addCartItem(customerId, product, qty, isRemove);
             return FormateData(cartResult);
         } catch (err) {
             throw new APIError('Data Not found', err)
@@ -131,7 +131,7 @@ class CustomerService {
 
     async ManageOrder(customerId, order) {
         try {
-            const orderResult = await this.repository.AddOrderToProfile(customerId, order);
+            const orderResult = await this.repository.addOrderToProfile(customerId, order);
             return FormateData(orderResult);
         } catch (err) {
             throw new APIError('Data Not found', err)
@@ -139,6 +139,7 @@ class CustomerService {
     }
 
     async SubscribeEvents(payload) {
+        console.log(payload);
 
         const { event, data } = payload;
 
@@ -157,6 +158,9 @@ class CustomerService {
                 break;
             case 'CREATE_ORDER':
                 this.ManageOrder(userId, order);
+                break;
+            case 'TEST':
+                console.log('Working fine ...');
                 break;
             default:
                 break;

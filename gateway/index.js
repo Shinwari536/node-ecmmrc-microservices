@@ -13,5 +13,5 @@ app.use('/', proxy('http://localhost:9002')); //
 
 
 app.listen(9000, () => {
-    console.log('Product is listening at PORT 9000...');
+    console.log('App is listening at PORT 9000...');
 });
