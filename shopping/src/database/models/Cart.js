@@ -8,26 +8,26 @@ const CartSchema = new Schema({
         {
             product: {
                 _id: { type: String, required: true },
-                name: String,
-                desc: String,
-                banner: String,
-                type: String,
-                unit: String,
-                price: Number,
-                suplier: String,
+                name: { type: String },
+                desc: { type: String },
+                banner: { type: String },
+                type: { type: String },
+                unit: { type: Number },
+                price: { type: Number },
+                suplier: { type: String },
 
             },
             unit: { type: Number, require: true }
         }
     ]
-},
-    {
-        toJSON: {
-            transform(doc, ret) {
-                delete ret.__v;
-            }
-        },
-        timestamps: true
-    });
+}, {
+    toJSON: {
+        transform(doc, ret) {
+            delete ret.__v;
+        }
+    },
+    timestamps: true
+}
+);
 
 module.exports = mongoose.model('cart', CartSchema);

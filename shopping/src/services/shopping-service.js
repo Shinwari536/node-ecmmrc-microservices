@@ -1,5 +1,6 @@
 const { ShoppingRepository } = require("../database");
-const { FormateData } = require("../utils");
+const { formateObjectData, formateArrayData } = require("../utils");
+const { APIError } = require('../utils/app-errors')
 
 // All Business logic will be here
 class ShoppingService {
@@ -11,7 +12,8 @@ class ShoppingService {
     async getCart(_id) {
         try {
             const cartItems = await this.repository.cart(_id);
-            return FormateData(cartItems);
+            return formateArrayData(cartItems);
+            
         } catch (error) {
             throw error;
         }
@@ -22,9 +24,9 @@ class ShoppingService {
         // Verify the txn number with payment logs
         try {
             const orderResult = await this.repository.createNewOrder(_id, txnNumber);
-            return FormateData(orderResult);
+            return formateObjectData(orderResult);
         } catch (err) {
-            throw new APIError('Data Not found', err)
+            throw err;
         }
 
     }
@@ -32,16 +34,16 @@ class ShoppingService {
     async getOrders(customerId) {
         try {
             const orders = await this.repository.orders(customerId);
-            return FormateData(orders);
+            return formateArrayData(orders);
         } catch (err) {
-            throw new APIError('Data Not found', err)
+            throw err;
         }
     }
 
     async getOrderDetails(orderId) {
         try {
             const orderDetails = await this.repository.orderDetails(orderId);
-            return FormateData(orderDetails);
+            return formateObjectData(orderDetails);
         } catch (error) {
             throw error
         }
@@ -50,15 +52,15 @@ class ShoppingService {
     async manageCart(customerId, item, qty, isRemove) {
         try {
             const cartResult = await this.repository.addCartItem(customerId, item, qty, isRemove);
-            return FormateData(cartResult);
+            return formateObjectData(cartResult);
         } catch (error) {
             throw error;
         }
     }
 
 
-    async SubscribeEvents(payload) {
-        console.log(payload);
+    async subscribeEvents(payload) {
+        // console.log(payload);
 
         const { event, data } = payload;
 
@@ -66,10 +68,10 @@ class ShoppingService {
 
         switch (event) {
             case 'ADD_TO_CART':
-                this.ManageCart(userId, product, qty, false);
+                this.manageCart(userId, product, qty, false);
                 break;
             case 'REMOVE_FROM_CART':
-                this.ManageCart(userId, product, qty, true);
+                this.manageCart(userId, product, qty, true);
                 break;
             default:
                 break;
@@ -85,14 +87,14 @@ class ShoppingService {
                 event: event,
                 data: {
                     userId,
-                    product: { _id: order._id, name: order.name, dec: order.desc, banner: order.banner, available: order.available, price: order.price },
+                    items: { _id: order._id, name: order.name, banner: order.banner, price: order.price },
                 }
             }
-            return FormateData(payload);
+            return formateObjectData(payload);
         } else {
             console.log("I am here- failed");
 
-            return FormateData(new Error("No product found."));
+            return formateObjectData(new Error("No product found."));
         }
     }
 

@@ -42,12 +42,32 @@ module.exports.ValidateSignature = async (req) => {
   }
 };
 
-module.exports.FormateData = (data) => {
-  if (data) {
-    return { data };
-  } else {
-    throw new Error("Data Not found!");
+module.exports.formateObjectData = (data) => {
+  console.log("Data: ", data);
+
+  if (!data) {
+    return {
+      data: {
+        data: null,
+        message: "No data found."
+      }
+    }
   }
+  return { data };
+};
+
+module.exports.formateArrayData = (data) => {
+
+  if (data.length === 0) {
+    return {
+      data: {
+        data: null,
+        message: "No data found."
+      }
+    }
+  }
+
+  return { data };
 };
 
 module.exports.PublishCustomerEvent = (payload) => {

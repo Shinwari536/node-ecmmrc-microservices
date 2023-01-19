@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan')
 const cors  = require('cors');
-const { customer, products, shopping } = require('./api');
+const { shopping, appEvents } = require('./api');
 const HandleErrors = require('./utils/error-handler')
 
 
@@ -13,9 +13,10 @@ module.exports = async (app) => {
     app.use(morgan('tiny'));
     app.use(express.static(__dirname + '/public'))
 
+    // Listening to app events
+    appEvents(app);
+
     //api
-    customer(app);
-    products(app);
     shopping(app);
 
     // error handling

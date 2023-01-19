@@ -1,6 +1,6 @@
 const { OrderModel, CartModel } = require('../models');
 const { v4: uuidv4 } = require('uuid');
-const { APIError, BadRequestError } = require('../../utils/app-errors')
+const { APIError, STATUS_CODES } = require('../../utils/app-errors')
 
 
 //Dealing with data base operations
@@ -11,7 +11,7 @@ class ShoppingRepository {
     async orders(customerId) {
         try {
             const orders = await OrderModel.find({ customerId });
-            if(orders) return orders;
+            if (orders) return orders;
             throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Order of given orderId')
         } catch (err) {
             throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Orders')
@@ -21,7 +21,7 @@ class ShoppingRepository {
     async orderDetails(orderId) {
         try {
             const order = await OrderModel.findOne({ orderId: orderId });
-            if(order) return order;
+            if (order) return order;
             throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Order of given orderId')
         } catch (err) {
             throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Orders')
@@ -30,13 +30,8 @@ class ShoppingRepository {
 
     async cart(customerId) {
         try {
-            const cartItems = await CartModel.find({
-                customerId
-            });
-            if (cartItems) {
-                return cartItems;
-            }
-            throw new Error("Cart Items not found.")
+            const cart = await CartModel.find({ customerId: customerId });
+            return cart;
         } catch (error) {
             throw error;
         }
@@ -82,7 +77,7 @@ class ShoppingRepository {
                 });
             }
         } catch (err) {
-            throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Create Customer')
+            throw new APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Create Customer')
         }
 
     }
@@ -97,22 +92,21 @@ class ShoppingRepository {
             session.startTransaction();
             const opts = { session };
 
-            const cart = await CartModel.findById(customerId);
+            const cart = await CartModel.findOne({ customerId: customerId });
 
             if (cart) {
 
                 let amount = 0;
 
                 let cartItems = cart.items;
+                console.log("Items: ", cartItems);
 
                 if (cartItems.length > 0) {
                     //process Order
                     cartItems.map(item => {
                         amount += parseInt(item.product.price) * parseInt(item.unit);
                     });
-
                     const orderId = uuidv4();
-
                     const order = new OrderModel({
                         orderId,
                         customerId,
@@ -127,19 +121,17 @@ class ShoppingRepository {
                     cart.save(opts);
                     await session.commitTransaction();
                     session.endSession();
-
                     return orderResult;
+                } else {
+                    throw new APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Cart is Empty.')
                 }
-            } else {
-                await session.abortTransaction();
-                session.endSession();
-                throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'No product found in the Cart.')
             }
+
 
         } catch (err) {
             await session.abortTransaction();
             session.endSession();
-            throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Cart')
+            throw err;
         }
 
 

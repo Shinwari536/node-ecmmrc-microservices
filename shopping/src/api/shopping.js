@@ -14,10 +14,10 @@ module.exports = (app) => {
 
         try {
             const { data } = await service.placeOrder({ _id, txnNumber });
-            const payload = await service.getProductPayload(_id, data, "CREATE_ORDER");
-            if (!payload) throw new Error("Payload not found.");
+            console.log("Data: api: ", data);
+            const payload = await service.getProductPayload(_id, data.items, "CREATE_ORDER");
             PublishCustomerEvent(payload);
-            return res.status(200).json(data);
+            return res.json(data);
 
         } catch (err) {
             next(err)
@@ -31,7 +31,7 @@ module.exports = (app) => {
 
         try {
             const { data } = await service.getOrders(_id);
-            return res.status(200).json(data.orders);
+            return res.status(200).json(data);
         } catch (err) {
             next(err);
         }
@@ -44,9 +44,12 @@ module.exports = (app) => {
         const { _id } = req.user;
         try {
             const { data } = await service.getCart(_id);
-            return res.status(200).json(data.cart);
+            return res.status(200).json(data);
         } catch (err) {
-            next(err);
+            // next(err);
+            console.log("error:", err);
+            return res.json(err);
+
         }
     });
 
